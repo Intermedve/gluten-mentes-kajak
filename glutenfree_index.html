@@ -30,6 +30,7 @@
 
   <script>
     const nutrientData = {
+      "Lilakáposzta": { gi: 10, kcal: 31, protein: 1.4, carbs: 5.3, fat: 0.2, fiber: 2.1, color: "#6511ED" },
       "Burgonya": { gi: "70-90", kcal: 77, protein: 2, carbs: 17, fat: 0.1, fiber: 2.2, color: "#FFD700" },
       "Édesburgonya": { gi: "50-60", kcal: 86, protein: 1.6, carbs: 20, fat: 0.1, fiber: 3, color: "#FF8C00" },
       "Rizs": { gi: 70, kcal: 130, protein: 2.4, carbs: 28, fat: 0.3, fiber: 0.4, color: "#F5F5DC" },
@@ -63,7 +64,8 @@
       { name: "Sült csirke rizzsel", needs: ["Csirke", "Rizs", "Olívaolaj"] },
       { name: "Hajdina zöldségekkel", needs: ["Hajdina", "Sárgarépa", "Brokkoli", "Olívaolaj"] },
       { name: "Quinoa saláta", needs: ["Quinoa", "Paprika", "Cukkini", "Olívaolaj"] },
-      { name: "Kukoricamálé", needs: ["Kukoricaliszt", "Tojás", "Vaj"] }
+      { name: "Kukoricamálé", needs: ["Kukoricaliszt", "Tojás", "Vaj"] },
+      { name: "Kínai káposztás tojás", needs: ["Tojás","Lilakáposzta", "Olívaolaj"]}
     ];
 
     const reverseSelect = document.getElementById("reverseSelect");
