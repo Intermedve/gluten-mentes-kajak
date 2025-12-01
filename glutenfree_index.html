@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gluténmentes ételkereső</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f4f8; color: #333; }
+    h1 { margin-bottom: 10px; color: #222; }
+    .card { background: white; padding: 10px; margin: 5px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #222; }
+    .result { margin-top: 10px; padding: 10px; background: #fff; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 20px; flex-wrap: wrap; color: #222; }
+    .nutrient-column { display: flex; flex-direction: column; gap: 10px; }
+    select.card { display: block; width: 100%; padding: 8px; margin-bottom: 10px; }
+    .ingredient-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .ingredient-item { padding: 5px 10px; border-radius: 12px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
+    .all-ingredients { margin-top: 20px; }
+    .all-ingredient-item { padding: 10px; margin-bottom: 5px; border-radius: 8px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
+  </style>
+</head>
+<body>
+  <h1>Gluténmentes étel → ételadatok</h1>
+  <p>A fordított keresésnél egy étel kiválasztásakor az összetevők tápértékei, GI-indexe és színkódja sorokban, meghatározott térközzel jelennek meg.</p>
+
+  <h2>Étel → szükséges alapanyagok</h2>
+  <select id="reverseSelect" class="card"></select>
+  <div id="reverseResult" class="result"></div>
+  <div id="ingredientList" class="ingredient-list"></div>
+
+  <div class="all-ingredients" id="allIngredients"></div>
+
+  <script>
+    const nutrientData = {
+      "Burgonya": { gi: "70-90", kcal: 77, protein: 2, carbs: 17, fat: 0.1, fiber: 2.2, color: "#FFD700" },
+      "Édesburgonya": { gi: "50-60", kcal: 86, protein: 1.6, carbs: 20, fat: 0.1, fiber: 3, color: "#FF8C00" },
+      "Rizs": { gi: 70, kcal: 130, protein: 2.4, carbs: 28, fat: 0.3, fiber: 0.4, color: "#F5F5DC" },
+      "Köles": { gi: 71, kcal: 119, protein: 3.5, carbs: 23.5, fat: 1, fiber: 1.3, color: "#FFE4B5" },
+      "Hajdina": { gi: 54, kcal: 92, protein: 3.4, carbs: 20, fat: 0.6, fiber: 2, color: "#D2B48C" },
+      "Quinoa": { gi: 53, kcal: 120, protein: 4.4, carbs: 21, fat: 1.9, fiber: 2.8, color: "#E6E6FA" },
+      "Kukorica": { gi: 52, kcal: 96, protein: 3.2, carbs: 21, fat: 1.5, fiber: 2.7, color: "#FFFF00" },
+      "Kukoricaliszt": { gi: 70, kcal: 361, protein: 6.9, carbs: 76, fat: 3.9, fiber: 7.3, color: "#FFFACD" },
+      "Tojás": { gi: 0, kcal: 155, protein: 13, carbs: 1.1, fat: 11, fiber: 0, color: "#FFF8DC" },
+      "Csirke": { gi: 0, kcal: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, color: "#FFE4E1" },
+      "Pulyka": { gi: 0, kcal: 135, protein: 29, carbs: 0, fat: 1, fiber: 0, color: "#F5DEB3" },
+      "Sertés": { gi: 0, kcal: 143, protein: 20, carbs: 0, fat: 6, fiber: 0, color: "#CD853F" },
+      "Marha": { gi: 0, kcal: 170, protein: 26, carbs: 0, fat: 7, fiber: 0, color: "#8B4513" },
+      "Hal": { gi: 0, kcal: 208, protein: 20, carbs: 0, fat: 13, fiber: 0, color: "#87CEFA" },
+      "Túró": { gi: 0, kcal: 98, protein: 12, carbs: 3.4, fat: 4.3, fiber: 0, color: "#444" },
+      "Tejföl": { gi: 0, kcal: 205, protein: 3, carbs: 3.6, fat: 20, fiber: 0, color: "#4F4F4F" },
+      "Sajt": { gi: 0, kcal: 350, protein: 24, carbs: 1.4, fat: 28, fiber: 0, color: "#DAA520" },
+      "Olívaolaj": { gi: 0, kcal: 884, protein: 0, carbs: 0, fat: 100, fiber: 0, color: "#556B2F" },
+      "Vaj": { gi: 0, kcal: 717, protein: 0.9, carbs: 0.1, fat: 81, fiber: 0, color: "#FFD700" },
+      "Sárgarépa": { gi: 35, kcal: 41, protein: 0.9, carbs: 10, fat: 0.2, fiber: 2.8, color: "#FF8C00" },
+      "Brokkoli": { gi: 15, kcal: 34, protein: 2.8, carbs: 7, fat: 0.4, fiber: 2.6, color: "#228B22" },
+      "Paprika": { gi: 10, kcal: 31, protein: 1, carbs: 6, fat: 0.3, fiber: 2.1, color: "#FF4500" },
+      "Cukkini": { gi: 15, kcal: 17, protein: 1.2, carbs: 3.1, fat: 0.3, fiber: 1, color: "#32CD32" },
+      "Alma": { gi: 36, kcal: 52, protein: 0.3, carbs: 14, fat: 0.2, fiber: 2.4, color: "#FF0000" },
+      "Banán": { gi: 51, kcal: 89, protein: 1.1, carbs: 23, fat: 0.3, fiber: 2.6, color: "#FFD700" },
+      "Narancs": { gi: 43, kcal: 47, protein: 0.9, carbs: 12, fat: 0.1, fiber: 2.4, color: "#FFA500" }
+    };
+
+    const recipes = [
+      { name: "Rakott krumpli", needs: ["Burgonya", "Tojás", "Tejföl", "Sajt"] },
+      { name: "Sült csirke rizzsel", needs: ["Csirke", "Rizs", "Olívaolaj"] },
+      { name: "Hajdina zöldségekkel", needs: ["Hajdina", "Sárgarépa", "Brokkoli", "Olívaolaj"] },
+      { name: "Quinoa saláta", needs: ["Quinoa", "Paprika", "Cukkini", "Olívaolaj"] },
+      { name: "Kukoricamálé", needs: ["Kukoricaliszt", "Tojás", "Vaj"] }
+    ];
+
+    const reverseSelect = document.getElementById("reverseSelect");
+    const ingredientListDiv = document.getElementById("ingredientList");
+    const allIngredientsDiv = document.getElementById("allIngredients");
+
+    function refreshDropdown() {
+      reverseSelect.innerHTML = '';
+      const placeholder = document.createElement('option');
+      placeholder.value = ''; placeholder.textContent = '-- Válassz ételt --';
+      placeholder.selected = true; placeholder.disabled = true;
+      reverseSelect.appendChild(placeholder);
+      recipes.forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r.name; opt.textContent = r.name;
+        reverseSelect.appendChild(opt);
+      });
+    }
+
+    function renderAllIngredients() {
+      allIngredientsDiv.innerHTML = '<h3>Összes ismert hozzávaló</h3>';
+      for (const name in nutrientData) {
+        const d = nutrientData[name];
+        const div = document.createElement('div');
+        div.className = 'all-ingredient-item';
+        div.style.backgroundColor = d.color;
+        div.style.color = '#fff';
+        div.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+        div.innerHTML = `<strong>${name}</strong> - GI: ${d.gi}, Kcal: ${d.kcal}, Fehérje: ${d.protein} g, Szénhidrát: ${d.carbs} g, Zsír: ${d.fat} g, Rost: ${d.fiber} g`;
+        allIngredientsDiv.appendChild(div);
+      }
+    }
+
+    refreshDropdown();
+    renderAllIngredients();
+
+    reverseSelect.addEventListener("change", () => {
+      const chosen = recipes.find(r => r.name === reverseSelect.value);
+      const box = document.getElementById("reverseResult");
+      ingredientListDiv.innerHTML = '';
+      if (!chosen) return;
+
+      const parts = [`<div class="card"><strong>${chosen.name}</strong><br>Hozzávalók: ${chosen.needs.join(", ")}</div>`];
+      chosen.needs.forEach(n => {
+        const d = nutrientData[n];
+        if (!d) { parts.push(`<div class="card">${n}: Nincs tápérték adat.</div>`); }
+        else {
+          parts.push(`<div class="card" style="background-color:${d.color}; line-height: 1.6; color:#fff; text-shadow:1px 1px 2px rgba(0,0,0,0.7)"><strong>${n}</strong><br>GI: ${d.gi}<br>Kcal: ${d.kcal}<br>Fehérje: ${d.protein} g<br>Szénhidrát: ${d.carbs} g<br>Zsír: ${d.fat} g<br>Rost: ${d.fiber} g</div>`);
+
+          const ingDiv = document.createElement('div');
+          ingDiv.textContent = n;
+          ingDiv.className = 'ingredient-item';
+          ingDiv.style.backgroundColor = d.color;
+          ingDiv.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
+          ingredientListDiv.appendChild(ingDiv);
+        }
+      });
+
+      box.innerHTML = parts.join("");
+    });
+  </script>
+</body>
+</html>
