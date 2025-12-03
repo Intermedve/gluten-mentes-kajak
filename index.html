@@ -55,6 +55,7 @@
           <tr>
             <th style="padding:10px; text-align:left;">Nap</th>
             <th style="padding:10px; text-align:left;">Ételek</th>
+            <th style="padding:10px; text-align:left;">Hozzávalók (összesítve)</th>
             <th style="padding:10px;">Kcal</th>
             <th style="padding:10px;">Fehérje</th>
             <th style="padding:10px;">Szénhidrát</th>
@@ -204,13 +205,13 @@
 
 <script>
   const weekData = {
-    "Hétfő": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Kedd": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Szerda": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Csütörtök": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Péntek": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Szombat": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Vasárnap": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0}
+    "Hétfő": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Kedd": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Szerda": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Csütörtök": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Péntek": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Szombat": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Vasárnap": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0}
   };
 
   function renderWeek() {
@@ -218,14 +219,23 @@
     tbody.innerHTML = '';
     for (const day in weekData) {
       const d = weekData[day];
+
+      const ingChips = Object.entries(d.ingredients || {}).map(([name, grams]) => {
+        const color = (nutrientData[name] && nutrientData[name].color) ? nutrientData[name].color : '#666';
+        return `<div class="ingredient-item" style="background-color:${color}; margin:3px 6px 3px 0;">${name} (${grams} g)</div>`;
+      }).join('');
+
       tbody.innerHTML += `<tr>
-        <td style="padding:10px; font-weight:bold;">${day}</td>
-        <td style="padding:10px;">${d.items.map(i => `<div style='margin-bottom:4px;'>${i}</div>`).join('')}</td>
-        <td style="padding:10px; text-align:center;">${d.kcal.toFixed(1)}</td>
-        <td style="padding:10px; text-align:center;">${d.protein.toFixed(1)}</td>
-        <td style="padding:10px; text-align:center;">${d.carbs.toFixed(1)}</td>
-        <td style="padding:10px; text-align:center;">${d.fat.toFixed(1)}</td>
-        <td style="padding:10px; text-align:center;">${d.fiber.toFixed(1)}</td>
+        <td style="padding:10px; font-weight:bold; vertical-align:top;">${day}</td>
+        <td style="padding:10px; vertical-align:top;">${d.items.map(i => `<div style='margin-bottom:4px;'>${i}</div>`).join('')}</td>
+        <td style="padding:10px; vertical-align:top;">
+          <div style="display:flex; flex-wrap:wrap;">${ingChips}</div>
+        </td>
+        <td style="padding:10px; text-align:center; vertical-align:top;">${d.kcal.toFixed(1)}</td>
+        <td style="padding:10px; text-align:center; vertical-align:top;">${d.protein.toFixed(1)}</td>
+        <td style="padding:10px; text-align:center; vertical-align:top;">${d.carbs.toFixed(1)}</td>
+        <td style="padding:10px; text-align:center; vertical-align:top;">${d.fat.toFixed(1)}</td>
+        <td style="padding:10px; text-align:center; vertical-align:top;">${d.fiber.toFixed(1)}</td>
       </tr>`;
     }
   }
@@ -234,7 +244,7 @@
 
   document.getElementById('clearDayBtn').addEventListener('click', ()=>{
     const day = document.getElementById('daySelect').value;
-    weekData[day] = { items:[], kcal:0, protein:0, carbs:0, fat:0, fiber:0 };
+    weekData[day] = { items:[], ingredients:{}, kcal:0, protein:0, carbs:0, fat:0, fiber:0 };
     renderWeek();
   });
 
@@ -251,11 +261,17 @@
       const currentGr = Math.round(baseGr * multiplier);
       const d = nutrientData[ing];
       if (!d) continue;
+
+      // Tápanyagok
       totals.kcal += d.kcal * currentGr / 100;
       totals.protein += d.protein * currentGr / 100;
       totals.carbs += d.carbs * currentGr / 100;
       totals.fat += d.fat * currentGr / 100;
       totals.fiber += d.fiber * currentGr / 100;
+
+      // ÚJ: összesített hozzávalók
+      if (!weekData[day].ingredients[ing]) weekData[day].ingredients[ing] = 0;
+      weekData[day].ingredients[ing] += currentGr;
     }
 
     weekData[day].kcal += totals.kcal;
