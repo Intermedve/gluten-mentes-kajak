@@ -5,15 +5,132 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gluténmentes ételkereső</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f4f8; color: #333; }
-    h1 { margin-bottom: 10px; color: #222; }
-    .card { background: white; padding: 10px; margin: 5px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #222; }
-    .result { margin-top: 10px; padding: 10px; background: #fff; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 20px; flex-wrap: wrap; color: #222; }
-    .ingredient-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-    .ingredient-item { padding: 5px 10px; border-radius: 12px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
+    :root{
+      /* Vintage téma */
+      --bg: #F7F1E3;               /* papírszerű háttér */
+      --text: #3B2F2F;             /* szöveg */
+      --heading: #2F2424;          /* címsorok */
+      --card: #FFFAF3;             /* kártyák */
+      --card-border: #E0D6C2;
+      --shadow: 0 2px 6px rgba(55,37,15,0.15);
+
+      --muted: #C9B99E;
+      --accent: #8C6B4F;
+      --accent-2: #C07A5A;
+
+      --table-head: #EADDCF;
+
+      --btn-green: #6B8F71;
+      --btn-green-hover: #5C7C61;
+      --btn-red: #B85C5C;
+      --btn-red-hover: #A34E4E;
+
+      --chipTextDark: #2B1F1F;
+      --chipTextLight: #FBF7EF;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+    h1, h2, h3 {
+      color: var(--heading);
+      margin-top: 0.2em;
+      letter-spacing: 0.2px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 12px;
+      margin: 6px 4px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+      color: var(--text);
+    }
+
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--text);
+    }
+
+    .ingredient-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .ingredient-item {
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-weight: bold;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      /* a színt és a text-color-t JS állítja */
+    }
+
     .all-ingredients { margin-top: 20px; }
-    .all-ingredient-item { padding: 10px; margin-bottom: 5px; border-radius: 8px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
-    .slider-box { margin-top: 15px; padding: 10px; background:#fff; border-radius: 6px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    .all-ingredient-item {
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      font-weight: bold;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      /* a színt és a text-color-t JS állítja */
+    }
+
+    .slider-box {
+      margin-top: 15px;
+      padding: 12px;
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+    }
+
+    /* Táblázat */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    thead { background: var(--table-head); }
+    th, td { padding: 10px; text-align: left; }
+    tbody tr + tr td { border-top: 1px solid #eae2d6; }
+
+    /* Gombok */
+    .btn {
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+      transition: background 0.15s ease;
+    }
+    .btn-green { background: var(--btn-green); }
+    .btn-green:hover { background: var(--btn-green-hover); }
+    .btn-red { background: var(--btn-red); }
+    .btn-red:hover { background: var(--btn-red-hover); }
+
+    select.card { padding: 6px 10px; }
   </style>
 </head>
 <body>
@@ -30,7 +147,7 @@
   <div id="reverseResult" class="result"></div>
   <div id="ingredientList" class="ingredient-list"></div>
 
-  <div id="weeklyPlanner" style="margin-top:20px; margin-bottom:30px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <div id="weeklyPlanner" style="margin-top:20px; margin-bottom:30px; box-shadow: var(--shadow);">
     <h2 style="margin-top:0; font-size:26px;">📅 Heti étkezés tervező</h2>
     <div class="card" style="padding:15px; display:flex; gap:20px; align-items:center;">
       <label><strong>Nap kiválasztása:</strong>
@@ -44,23 +161,23 @@
           <option value="Vasárnap">Vasárnap</option>
         </select>
       </label>
-      <button id="addToDayBtn" style="background:#4CAF50; color:white; padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">➕ Hozzáadás</button>
-      <button id="clearDayBtn" style="background:#d9534f; color:white; padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">🗑️ Kiválasztott nap törlése</button>																																																						 
+      <button id="addToDayBtn" class="btn btn-green">➕ Hozzáadás</button>
+      <button id="clearDayBtn" class="btn btn-red">🗑️ Kiválasztott nap törlése</button>
     </div>
 
-    <div id="weekTable" class="card" style="margin-top:20px; padding:20px; border-radius:12px; background:#ffffffcc; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+    <div id="weekTable" class="card" style="margin-top:20px; padding:20px; border-radius:12px;">
       <h3 style="font-size:22px; margin-bottom:15px;">Heti tápanyag összesítő</h3>
-      <table style="border-collapse:collapse; width:100%; background:white; border-radius:10px; overflow:hidden;">
-        <thead style="background:#e3e9f0;">
+      <table>
+        <thead>
           <tr>
-            <th style="padding:10px; text-align:left;">Nap</th>
-            <th style="padding:10px; text-align:left;">Ételek</th>
-            <th style="padding:10px; text-align:left;">Hozzávalók (összesítve)</th>
-            <th style="padding:10px;">Kcal</th>
-            <th style="padding:10px;">Fehérje</th>
-            <th style="padding:10px;">Szénhidrát</th>
-            <th style="padding:10px;">Zsír</th>
-            <th style="padding:10px;">Rost</th>
+            <th>Nap</th>
+            <th>Ételek</th>
+            <th>Hozzávalók (összesítve)</th>
+            <th style="text-align:center;">Kcal</th>
+            <th style="text-align:center;">Fehérje</th>
+            <th style="text-align:center;">Szénhidrát</th>
+            <th style="text-align:center;">Zsír</th>
+            <th style="text-align:center;">Rost</th>
           </tr>
         </thead>
         <tbody id="weekBody"></tbody>
@@ -68,12 +185,12 @@
     </div>
   </div>
 
-  <div id="weeklyShopping" class="card" style="margin-top:20px; padding:20px; border-radius:12px; background:#ffffffcc; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <h3 style="font-size:22px; margin-bottom:15px;">🛒 Heti bevásárlólista (összes nap)</h3>
-  <div id="weeklyShoppingChips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+  <div id="weeklyShopping" class="card" style="margin-top:20px; padding:20px; border-radius:12px;">
+    <h3 style="font-size:22px; margin-bottom:15px;">🛒 Heti bevásárlólista (összes nap)</h3>
+    <div id="weeklyShoppingChips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
   </div>
   
-  <div id="ingredientLegend" class="card" style="margin-top:20px; background:#e0e7ef; color:#222;">
+  <div id="ingredientLegend" class="card" style="margin-top:20px;">
     <h3>Jelmagyarázat a nem grammban értelmezhető hozzávalókhoz</h3>
     <ul>
       <li><strong>Tojás (S)</strong> ≈ 50 g</li>
@@ -86,34 +203,59 @@
   <div id="allIngredients" class="all-ingredients"></div>
 
   <script>
+    // Kontrasztos szövegszín számítás a háttér alapján (WCAG-szerű luminancia)
+    function hexToRgb(hex) {
+      const s = hex.replace('#','').trim();
+      const v = s.length === 3
+        ? s.split('').map(c => parseInt(c + c, 16))
+        : [parseInt(s.slice(0,2),16), parseInt(s.slice(2,4),16), parseInt(s.slice(4,6),16)];
+      return { r: v[0], g: v[1], b: v[2] };
+    }
+    function relLuminance({r,g,b}) {
+      const srgb = [r/255, g/255, b/255].map(v => v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4));
+      return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
+    }
+    function getReadableTextColor(bgHex) {
+      try {
+        const rgb = hexToRgb(bgHex);
+        const L = relLuminance(rgb);
+        // váltsunk 0.5 körül – világos háttéren sötét szöveg, sötét háttéren világos
+        return L > 0.5 ? getComputedStyle(document.documentElement).getPropertyValue('--chipTextDark').trim() || '#2B1F1F'
+                       : getComputedStyle(document.documentElement).getPropertyValue('--chipTextLight').trim() || '#FBF7EF';
+      } catch(e) {
+        return '#2B1F1F';
+      }
+    }
+
     const nutrientData = {
-      "Lilakáposzta": { gi: 10, kcal: 31, protein: 1.4, carbs: 5.3, fat: 0.2, fiber: 2.1, color: "#6511ED" },																											  
-      "Burgonya": { gi: "70-90", kcal: 77, protein: 2, carbs: 17, fat: 0.1, fiber: 2.2, color: "#FFD700" },
-      "Édesburgonya": { gi: "50-60", kcal: 86, protein: 1.6, carbs: 20, fat: 0.1, fiber: 3, color: "#FF8C00" },
-      "Rizs": { gi: 70, kcal: 130, protein: 2.4, carbs: 28, fat: 0.3, fiber: 0.4, color: "#F5F5DC" },
-      "Köles": { gi: 71, kcal: 119, protein: 3.5, carbs: 23.5, fat: 1, fiber: 1.3, color: "#FFE4B5" },
-      "Hajdina": { gi: 54, kcal: 92, protein: 3.4, carbs: 20, fat: 0.6, fiber: 2, color: "#D2B48C" },
-      "Quinoa": { gi: 53, kcal: 120, protein: 4.4, carbs: 21, fat: 1.9, fiber: 2.8, color: "#E6E6FA" },
-      "Kukorica": { gi: 52, kcal: 96, protein: 3.2, carbs: 21, fat: 1.5, fiber: 2.7, color: "#FFFF00" },
-      "Kukoricaliszt": { gi: 70, kcal: 361, protein: 6.9, carbs: 76, fat: 3.9, fiber: 7.3, color: "#FFFACD" },
-      "Tojás": { gi: 0, kcal: 155, protein: 13, carbs: 1.1, fat: 11, fiber: 0, color: "#FFF8DC" },
-      "Csirke": { gi: 0, kcal: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, color: "#FFE4E1" },
-      "Pulyka": { gi: 0, kcal: 135, protein: 29, carbs: 0, fat: 1, fiber: 0, color: "#F5DEB3" },
-      "Sertés": { gi: 0, kcal: 143, protein: 20, carbs: 0, fat: 6, fiber: 0, color: "#CD853F" },
-      "Marha": { gi: 0, kcal: 170, protein: 26, carbs: 0, fat: 7, fiber: 0, color: "#8B4513" },
-      "Hal": { gi: 0, kcal: 208, protein: 20, carbs: 0, fat: 13, fiber: 0, color: "#87CEFA" },
-      "Túró": { gi: 0, kcal: 98, protein: 12, carbs: 3.4, fat: 4.3, fiber: 0, color: "#444" },
-      "Tejföl": { gi: 0, kcal: 205, protein: 3, carbs: 3.6, fat: 20, fiber: 0, color: "#4F4F4F" },
-      "Sajt": { gi: 0, kcal: 350, protein: 24, carbs: 1.4, fat: 28, fiber: 0, color: "#DAA520" },
-      "Olívaolaj": { gi: 0, kcal: 884, protein: 0, carbs: 0, fat: 100, fiber: 0, color: "#556B2F" },
-      "Vaj": { gi: 0, kcal: 717, protein: 0.9, carbs: 0.1, fat: 81, fiber: 0, color: "#FFD700" },
-      "Sárgarépa": { gi: 35, kcal: 41, protein: 0.9, carbs: 10, fat: 0.2, fiber: 2.8, color: "#FF8C00" },
-      "Brokkoli": { gi: 15, kcal: 34, protein: 2.8, carbs: 7, fat: 0.4, fiber: 2.6, color: "#228B22" },
-      "Paprika": { gi: 10, kcal: 31, protein: 1, carbs: 6, fat: 0.3, fiber: 2.1, color: "#FF4500" },
-      "Cukkini": { gi: 15, kcal: 17, protein: 1.2, carbs: 3.1, fat: 0.3, fiber: 1, color: "#32CD32" },
-      "Alma": { gi: 36, kcal: 52, protein: 0.3, carbs: 14, fat: 0.2, fiber: 2.4, color: "#FF0000" },
-      "Banán": { gi: 51, kcal: 89, protein: 1.1, carbs: 23, fat: 0.3, fiber: 2.6, color: "#FFD700" },
-      "Narancs": { gi: 43, kcal: 47, protein: 0.9, carbs: 12, fat: 0.1, fiber: 2.4, color: "#FFA500" }
+      // Letompított, vintage árnyalatok
+      "Lilakáposzta": { gi: 10, kcal: 31, protein: 1.4, carbs: 5.3, fat: 0.2, fiber: 2.1, color: "#6C5A92" },
+      "Burgonya": { gi: "70-90", kcal: 77, protein: 2, carbs: 17, fat: 0.1, fiber: 2.2, color: "#C9A54B" },
+      "Édesburgonya": { gi: "50-60", kcal: 86, protein: 1.6, carbs: 20, fat: 0.1, fiber: 3, color: "#C67A3C" },
+      "Rizs": { gi: 70, kcal: 130, protein: 2.4, carbs: 28, fat: 0.3, fiber: 0.4, color: "#E9E1CC" },
+      "Köles": { gi: 71, kcal: 119, protein: 3.5, carbs: 23.5, fat: 1, fiber: 1.3, color: "#E7D1A6" },
+      "Hajdina": { gi: 54, kcal: 92, protein: 3.4, carbs: 20, fat: 0.6, fiber: 2, color: "#B69A7A" },
+      "Quinoa": { gi: 53, kcal: 120, protein: 4.4, carbs: 21, fat: 1.9, fiber: 2.8, color: "#D7D1E1" },
+      "Kukorica": { gi: 52, kcal: 96, protein: 3.2, carbs: 21, fat: 1.5, fiber: 2.7, color: "#E2CF5B" },
+      "Kukoricaliszt": { gi: 70, kcal: 361, protein: 6.9, carbs: 76, fat: 3.9, fiber: 7.3, color: "#EFE2A9" },
+      "Tojás": { gi: 0, kcal: 155, protein: 13, carbs: 1.1, fat: 11, fiber: 0, color: "#EDE4CF" },
+      "Csirke": { gi: 0, kcal: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, color: "#E7D6C8" },
+      "Pulyka": { gi: 0, kcal: 135, protein: 29, carbs: 0, fat: 1, fiber: 0, color: "#E8D7B9" },
+      "Sertés": { gi: 0, kcal: 143, protein: 20, carbs: 0, fat: 6, fiber: 0, color: "#A97C56" },
+      "Marha": { gi: 0, kcal: 170, protein: 26, carbs: 0, fat: 7, fiber: 0, color: "#7E5639" },
+      "Hal": { gi: 0, kcal: 208, protein: 20, carbs: 0, fat: 13, fiber: 0, color: "#9CB8C8" },
+      "Túró": { gi: 0, kcal: 98, protein: 12, carbs: 3.4, fat: 4.3, fiber: 0, color: "#CFCFCF" },
+      "Tejföl": { gi: 0, kcal: 205, protein: 3, carbs: 3.6, fat: 20, fiber: 0, color: "#BEBEBE" },
+      "Sajt": { gi: 0, kcal: 350, protein: 24, carbs: 1.4, fat: 28, fiber: 0, color: "#C9A44A" },
+      "Olívaolaj": { gi: 0, kcal: 884, protein: 0, carbs: 0, fat: 100, fiber: 0, color: "#6E7B4B" },
+      "Vaj": { gi: 0, kcal: 717, protein: 0.9, carbs: 0.1, fat: 81, fiber: 0, color: "#D4B454" },
+      "Sárgarépa": { gi: 35, kcal: 41, protein: 0.9, carbs: 10, fat: 0.2, fiber: 2.8, color: "#D1823E" },
+      "Brokkoli": { gi: 15, kcal: 34, protein: 2.8, carbs: 7, fat: 0.4, fiber: 2.6, color: "#558B55" },
+      "Paprika": { gi: 10, kcal: 31, protein: 1, carbs: 6, fat: 0.3, fiber: 2.1, color: "#C2603D" },
+      "Cukkini": { gi: 15, kcal: 17, protein: 1.2, carbs: 3.1, fat: 0.3, fiber: 1, color: "#7BA266" },
+      "Alma": { gi: 36, kcal: 52, protein: 0.3, carbs: 14, fat: 0.2, fiber: 2.4, color: "#B4615E" },
+      "Banán": { gi: 51, kcal: 89, protein: 1.1, carbs: 23, fat: 0.3, fiber: 2.6, color: "#D2B75A" },
+      "Narancs": { gi: 43, kcal: 47, protein: 0.9, carbs: 12, fat: 0.1, fiber: 2.4, color: "#D09248" }
     };
 
     // → Új: alap gramm mennyiségek
@@ -123,7 +265,7 @@
       { name: "Hajdina zöldségekkel", needs: { "Hajdina": 200, "Sárgarépa": 150, "Brokkoli": 200, "Olívaolaj": 20 } },
       { name: "Quinoa saláta", needs: { "Quinoa": 200, "Paprika": 150, "Cukkini": 150, "Olívaolaj": 20 } },
       { name: "Kukoricamálé", needs: { "Kukoricaliszt": 250, "Tojás": 100, "Vaj": 80 } },
-	  { name: "Kínai káposztás tojás", needs: {"Tojás": 200,"Lilakáposzta": 500, "Olívaolaj": 50}}																							 
+      { name: "Kínai káposztás tojás", needs: {"Tojás": 200,"Lilakáposzta": 500, "Olívaolaj": 50}}
     ];
 
     const reverseSelect = document.getElementById("reverseSelect");
@@ -145,6 +287,7 @@
         const div = document.createElement('div');
         div.className = 'all-ingredient-item';
         div.style.backgroundColor = d.color;
+        div.style.color = getReadableTextColor(d.color);
         div.innerHTML = `<strong>${name}</strong> - GI: ${d.gi}, Kcal: ${d.kcal}, Fehérje: ${d.protein} g, Szénhidrát: ${d.carbs} g, Zsír: ${d.fat} g, Rost: ${d.fiber} g`;
         allIngredientsDiv.appendChild(div);
       }
@@ -172,7 +315,7 @@
       const box = document.getElementById("reverseResult");
       ingredientListDiv.innerHTML = '';
 
-      let html = `<div class=card><strong>${chosen.name}</strong><br>Alap mennyiség skálázva: ${multiplier.toFixed(1)}×</div>`;
+      let html = `<div class="card"><strong>${chosen.name}</strong><br>Alap mennyiség skálázva: ${multiplier.toFixed(1)}×</div>`;
 
       for (const ing in chosen.needs) {
         const baseGr = chosen.needs[ing];
@@ -187,8 +330,10 @@
         const fat = (d.fat * currentGr / 100).toFixed(1);
         const fiber = (d.fiber * currentGr / 100).toFixed(1);
 
+        const fg = getReadableTextColor(d.color);
+
         html += `
-        <div class="card" style="background-color:${d.color}; color:#fff; text-shadow:1px 1px 2px #000">
+        <div class="card" style="background-color:${d.color}; color:${fg}; border-color: rgba(0,0,0,0.08);">
           <strong>${ing}</strong> – ${currentGr} g<br>
           GI: ${d.gi}<br>
           Kcal: ${kcal}<br>
@@ -202,6 +347,7 @@
         tag.className = 'ingredient-item';
         tag.textContent = ing + " (" + currentGr + " g)";
         tag.style.backgroundColor = d.color;
+        tag.style.color = fg;
         ingredientListDiv.appendChild(tag);
       }
 
@@ -209,126 +355,121 @@
     }
   </script>
 
-<script>
-  const weekData = {
-    "Hétfő": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Kedd": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Szerda": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Csütörtök": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Péntek": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Szombat": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
-    "Vasárnap": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0}
-  };
+  <script>
+    const weekData = {
+      "Hétfő": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+      "Kedd": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+      "Szerda": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+      "Csütörtök": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+      "Péntek": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+      "Szombat": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+      "Vasárnap": { items: [], ingredients: {}, kcal:0, protein:0, carbs:0, fat:0, fiber:0}
+    };
 
-  function renderWeek() {
-    const tbody = document.getElementById('weekBody');
-    tbody.innerHTML = '';
-    for (const day in weekData) {
-      const d = weekData[day];
+    function renderWeek() {
+      const tbody = document.getElementById('weekBody');
+      tbody.innerHTML = '';
+      for (const day in weekData) {
+        const d = weekData[day];
 
-      const ingChips = Object.entries(d.ingredients || {}).map(([name, grams]) => {
-        const color = (nutrientData[name] && nutrientData[name].color) ? nutrientData[name].color : '#666';
-        return `<div class="ingredient-item" style="background-color:${color}; margin:3px 6px 3px 0;">${name} (${grams} g)</div>`;
+        const ingChips = Object.entries(d.ingredients || {}).map(([name, grams]) => {
+          const color = (nutrientData[name] && nutrientData[name].color) ? nutrientData[name].color : '#8E8E8E';
+          const fg = getReadableTextColor(color);
+          return `<div class="ingredient-item" style="background-color:${color}; color:${fg}; margin:3px 6px 3px 0;">${name} (${grams} g)</div>`;
+        }).join('');
+
+        tbody.innerHTML += `<tr>
+          <td style="vertical-align:top; font-weight:bold;">${day}</td>
+          <td style="vertical-align:top;">${d.items.map(i => `<div style='margin-bottom:4px;'>${i}</div>`).join('')}</td>
+          <td style="vertical-align:top;">
+            <div style="display:flex; flex-wrap:wrap;">${ingChips}</div>
+          </td>
+          <td style="text-align:center; vertical-align:top;">${d.kcal.toFixed(1)}</td>
+          <td style="text-align:center; vertical-align:top;">${d.protein.toFixed(1)}</td>
+          <td style="text-align:center; vertical-align:top;">${d.carbs.toFixed(1)}</td>
+          <td style="text-align:center; vertical-align:top;">${d.fat.toFixed(1)}</td>
+          <td style="text-align:center; vertical-align:top;">${d.fiber.toFixed(1)}</td>
+        </tr>`;
+      }
+
+      renderWeeklyShopping();
+    }
+
+    renderWeek();
+
+    document.getElementById('clearDayBtn').addEventListener('click', ()=>{
+      const day = document.getElementById('daySelect').value;
+      weekData[day] = { items:[], ingredients:{}, kcal:0, protein:0, carbs:0, fat:0, fiber:0 };
+      renderWeek();
+    });
+
+    document.getElementById('addToDayBtn').addEventListener('click', () => {
+      const chosen = recipes.find(r => r.name === document.getElementById("reverseSelect").value);
+      if (!chosen) return alert('Válassz ki egy ételt!');
+
+      const multiplier = parseFloat(document.getElementById("scaleSlider").value);
+      const day = document.getElementById('daySelect').value;
+
+      let totals = {kcal:0, protein:0, carbs:0, fat:0, fiber:0};
+      for (const ing in chosen.needs) {
+        const baseGr = chosen.needs[ing];
+        const currentGr = Math.round(baseGr * multiplier);
+        const d = nutrientData[ing];
+        if (!d) continue;
+
+        totals.kcal += d.kcal * currentGr / 100;
+        totals.protein += d.protein * currentGr / 100;
+        totals.carbs += d.carbs * currentGr / 100;
+        totals.fat += d.fat * currentGr / 100;
+        totals.fiber += d.fiber * currentGr / 100;
+
+        if (!weekData[day].ingredients[ing]) weekData[day].ingredients[ing] = 0;
+        weekData[day].ingredients[ing] += currentGr;
+      }
+
+      weekData[day].kcal += totals.kcal;
+      weekData[day].protein += totals.protein;
+      weekData[day].carbs += totals.carbs;
+      weekData[day].fat += totals.fat;
+      weekData[day].fiber += totals.fiber;
+
+      weekData[day].items.push(chosen.name + " (" + multiplier.toFixed(1) + "×)");
+
+      renderWeek();
+    });
+
+    function getWeeklyIngredients() {
+      const weekly = {};
+      for (const day in weekData) {
+        const ingMap = weekData[day].ingredients || {};
+        for (const name in ingMap) {
+          if (!weekly[name]) weekly[name] = 0;
+          weekly[name] += ingMap[name];
+        }
+      }
+      return weekly;
+    }
+
+    function renderWeeklyShopping() {
+      const container = document.getElementById('weeklyShoppingChips');
+      if (!container) return;
+      const weekly = getWeeklyIngredients();
+      const entries = Object.entries(weekly);
+
+      if (entries.length === 0) {
+        container.innerHTML = '<div class="card" style="background:#F3EEE3; color:#5A4A42;">Nincs még tétel. Adj hozzá ételeket a napokhoz!</div>';
+        return;
+      }
+
+      entries.sort((a,b)=> a[0].localeCompare(b[0],'hu'));
+
+      container.innerHTML = entries.map(([name, grams]) => {
+        const color = (nutrientData[name] && nutrientData[name].color) ? nutrientData[name].color : '#8E8E8E';
+        const fg = getReadableTextColor(color);
+        return `<div class="ingredient-item" style="background-color:${color}; color:${fg}; margin:3px 6px 3px 0;">${name} (${grams} g)</div>`;
       }).join('');
-
-      tbody.innerHTML += `<tr>
-        <td style="padding:10px; font-weight:bold; vertical-align:top;">${day}</td>
-        <td style="padding:10px; vertical-align:top;">${d.items.map(i => `<div style='margin-bottom:4px;'>${i}</div>`).join('')}</td>
-        <td style="padding:10px; vertical-align:top;">
-          <div style="display:flex; flex-wrap:wrap;">${ingChips}</div>
-        </td>
-        <td style="padding:10px; text-align:center; vertical-align:top;">${d.kcal.toFixed(1)}</td>
-        <td style="padding:10px; text-align:center; vertical-align:top;">${d.protein.toFixed(1)}</td>
-        <td style="padding:10px; text-align:center; vertical-align:top;">${d.carbs.toFixed(1)}</td>
-        <td style="padding:10px; text-align:center; vertical-align:top;">${d.fat.toFixed(1)}</td>
-        <td style="padding:10px; text-align:center; vertical-align:top;">${d.fiber.toFixed(1)}</td>
-      </tr>`;
     }
-
-    // ÚJ: heti bevásárlólista frissítése
-    renderWeeklyShopping();
-  }
-
-
-  renderWeek();
-
-  document.getElementById('clearDayBtn').addEventListener('click', ()=>{
-    const day = document.getElementById('daySelect').value;
-    weekData[day] = { items:[], ingredients:{}, kcal:0, protein:0, carbs:0, fat:0, fiber:0 };
-    renderWeek();
-  });
-
-  document.getElementById('addToDayBtn').addEventListener('click', () => {
-    const chosen = recipes.find(r => r.name === reverseSelect.value);
-    if (!chosen) return alert('Válassz ki egy ételt!');
-
-    const multiplier = parseFloat(scaleSlider.value);
-    const day = document.getElementById('daySelect').value;
-
-    let totals = {kcal:0, protein:0, carbs:0, fat:0, fiber:0};
-    for (const ing in chosen.needs) {
-      const baseGr = chosen.needs[ing];
-      const currentGr = Math.round(baseGr * multiplier);
-      const d = nutrientData[ing];
-      if (!d) continue;
-
-      // Tápanyagok
-      totals.kcal += d.kcal * currentGr / 100;
-      totals.protein += d.protein * currentGr / 100;
-      totals.carbs += d.carbs * currentGr / 100;
-      totals.fat += d.fat * currentGr / 100;
-      totals.fiber += d.fiber * currentGr / 100;
-
-      // ÚJ: összesített hozzávalók
-      if (!weekData[day].ingredients[ing]) weekData[day].ingredients[ing] = 0;
-      weekData[day].ingredients[ing] += currentGr;
-    }
-
-    weekData[day].kcal += totals.kcal;
-    weekData[day].protein += totals.protein;
-    weekData[day].carbs += totals.carbs;
-    weekData[day].fat += totals.fat;
-    weekData[day].fiber += totals.fiber;
-
-    weekData[day].items.push(chosen.name + " (" + multiplier.toFixed(1) + "×)");
-
-    renderWeek();
-  });
-
-  function getWeeklyIngredients() {
-  const weekly = {};
-  for (const day in weekData) {
-    const ingMap = weekData[day].ingredients || {};
-    for (const name in ingMap) {
-      if (!weekly[name]) weekly[name] = 0;
-      weekly[name] += ingMap[name];
-    }
-  }
-  return weekly;
-  }
-
-  function renderWeeklyShopping() {
-  const container = document.getElementById('weeklyShoppingChips');
-  if (!container) return;
-  const weekly = getWeeklyIngredients();
-  const entries = Object.entries(weekly);
-
-  if (entries.length === 0) {
-    container.innerHTML = '<div class="card" style="background:#f5f7fa; color:#444;">Nincs még tétel. Adj hozzá ételeket a napokhoz!</div>';
-    return;
-  }
-
-  // ABC szerint rendezzük
-  entries.sort((a,b)=> a[0].localeCompare(b[0],'hu'));
-
-  container.innerHTML = entries.map(([name, grams]) => {
-    const color = (nutrientData[name] && nutrientData[name].color) ? nutrientData[name].color : '#666';
-    return `<div class="ingredient-item" style="background-color:${color}; margin:3px 6px 3px 0;">${name} (${grams} g)</div>`;
-  }).join('');
-  }
-
-
-</script>
+  </script>
 
 </body>
 </html>
