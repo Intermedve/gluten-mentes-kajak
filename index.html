@@ -67,6 +67,11 @@
       </table>
     </div>
   </div>
+
+  <div id="weeklyShopping" class="card" style="margin-top:20px; padding:20px; border-radius:12px; background:#ffffffcc; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <h3 style="font-size:22px; margin-bottom:15px;">🛒 Heti bevásárlólista (összes nap)</h3>
+  <div id="weeklyShoppingChips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+  </div>
   
   <div id="allIngredients" class="all-ingredients"></div>
 
@@ -238,7 +243,11 @@
         <td style="padding:10px; text-align:center; vertical-align:top;">${d.fiber.toFixed(1)}</td>
       </tr>`;
     }
+
+    // ÚJ: heti bevásárlólista frissítése
+    renderWeeklyShopping();
   }
+
 
   renderWeek();
 
@@ -284,6 +293,40 @@
 
     renderWeek();
   });
+
+  function getWeeklyIngredients() {
+  const weekly = {};
+  for (const day in weekData) {
+    const ingMap = weekData[day].ingredients || {};
+    for (const name in ingMap) {
+      if (!weekly[name]) weekly[name] = 0;
+      weekly[name] += ingMap[name];
+    }
+  }
+  return weekly;
+  }
+
+  function renderWeeklyShopping() {
+  const container = document.getElementById('weeklyShoppingChips');
+  if (!container) return;
+  const weekly = getWeeklyIngredients();
+  const entries = Object.entries(weekly);
+
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="card" style="background:#f5f7fa; color:#444;">Nincs még tétel. Adj hozzá ételeket a napokhoz!</div>';
+    return;
+  }
+
+  // ABC szerint rendezzük
+  entries.sort((a,b)=> a[0].localeCompare(b[0],'hu'));
+
+  container.innerHTML = entries.map(([name, grams]) => {
+    const color = (nutrientData[name] && nutrientData[name].color) ? nutrientData[name].color : '#666';
+    return `<div class="ingredient-item" style="background-color:${color}; margin:3px 6px 3px 0;">${name} (${grams} g)</div>`;
+  }).join('');
+  }
+
+
 </script>
 
 </body>
