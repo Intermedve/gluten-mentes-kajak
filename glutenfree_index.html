@@ -29,11 +29,49 @@
 
   <div id="reverseResult" class="result"></div>
   <div id="ingredientList" class="ingredient-list"></div>
+
+      <div id="weeklyPlanner" style="margin-bottom:30px;">
+    <h2 style="margin-top:0; font-size:26px;">📅 Heti étkezés tervező</h2>
+    <div class="card" style="padding:15px; display:flex; gap:20px; align-items:center;">
+      <label><strong>Nap kiválasztása:</strong>
+        <select id="daySelect" class="card" style="padding:5px 10px;">
+          <option value="Hétfő">Hétfő</option>
+          <option value="Kedd">Kedd</option>
+          <option value="Szerda">Szerda</option>
+          <option value="Csütörtök">Csütörtök</option>
+          <option value="Péntek">Péntek</option>
+          <option value="Szombat">Szombat</option>
+          <option value="Vasárnap">Vasárnap</option>
+        </select>
+      </label>
+      <button id="addToDayBtn" style="background:#4CAF50; color:white; padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">➕ Hozzáadás</button>
+      <button id="clearDayBtn" style="margin-top:10px; background:#d9534f; color:white; padding:8px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">🗑️ Kiválasztott nap törlése</button>																																																						 
+    </div>
+
+    <div id="weekTable" class="card" style="margin-top:20px; padding:20px; border-radius:12px; background:#ffffffcc; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      <h3 style="font-size:22px; margin-bottom:15px;">Heti tápanyag összesítő</h3>
+      <table style="border-collapse:collapse; width:100%; background:white; border-radius:10px; overflow:hidden;">
+        <thead style="background:#e3e9f0;">
+          <tr>
+            <th style="padding:10px; text-align:left;">Nap</th>
+            <th style="padding:10px; text-align:left;">Ételek</th>
+            <th style="padding:10px;">Kcal</th>
+            <th style="padding:10px;">Fehérje</th>
+            <th style="padding:10px;">Szénhidrát</th>
+            <th style="padding:10px;">Zsír</th>
+            <th style="padding:10px;">Rost</th>
+          </tr>
+        </thead>
+        <tbody id="weekBody"></tbody>
+      </table>
+    </div>
+  </div>
+  
   <div id="allIngredients" class="all-ingredients"></div>
 
   <script>
     const nutrientData = {
-      "Lilakáposzta": { gi: 10, kcal: 31, protein: 1.4, carbs: 5.3, fat: 0.2, fiber: 2.1, color: "#6511ED" },
+      "Lilakáposzta": { gi: 10, kcal: 31, protein: 1.4, carbs: 5.3, fat: 0.2, fiber: 2.1, color: "#6511ED" },																											  
       "Burgonya": { gi: "70-90", kcal: 77, protein: 2, carbs: 17, fat: 0.1, fiber: 2.2, color: "#FFD700" },
       "Édesburgonya": { gi: "50-60", kcal: 86, protein: 1.6, carbs: 20, fat: 0.1, fiber: 3, color: "#FF8C00" },
       "Rizs": { gi: 70, kcal: 130, protein: 2.4, carbs: 28, fat: 0.3, fiber: 0.4, color: "#F5F5DC" },
@@ -69,7 +107,7 @@
       { name: "Hajdina zöldségekkel", needs: { "Hajdina": 200, "Sárgarépa": 150, "Brokkoli": 200, "Olívaolaj": 20 } },
       { name: "Quinoa saláta", needs: { "Quinoa": 200, "Paprika": 150, "Cukkini": 150, "Olívaolaj": 20 } },
       { name: "Kukoricamálé", needs: { "Kukoricaliszt": 250, "Tojás": 100, "Vaj": 80 } },
-      { name: "Kínai káposztás tojás", needs: {"Tojás": 200,"Lilakáposzta": 500, "Olívaolaj": 50}}
+	  { name: "Kínai káposztás tojás", needs: {"Tojás": 200,"Lilakáposzta": 500, "Olívaolaj": 50}}																							 
     ];
 
     const reverseSelect = document.getElementById("reverseSelect");
@@ -163,5 +201,74 @@
       <li><strong>Olívaolaj</strong> – 1 evőkanál ≈ 13.5 g</li>
     </ul>
   </div>
+
+<script>
+  const weekData = {
+    "Hétfő": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Kedd": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Szerda": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Csütörtök": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Péntek": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Szombat": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0},
+    "Vasárnap": { items: [], kcal:0, protein:0, carbs:0, fat:0, fiber:0}
+  };
+
+  function renderWeek() {
+    const tbody = document.getElementById('weekBody');
+    tbody.innerHTML = '';
+    for (const day in weekData) {
+      const d = weekData[day];
+      tbody.innerHTML += `<tr>
+        <td style="padding:10px; font-weight:bold;">${day}</td>
+        <td style="padding:10px;">${d.items.map(i => `<div style='margin-bottom:4px;'>${i}</div>`).join('')}</td>
+        <td style="padding:10px; text-align:center;">${d.kcal.toFixed(1)}</td>
+        <td style="padding:10px; text-align:center;">${d.protein.toFixed(1)}</td>
+        <td style="padding:10px; text-align:center;">${d.carbs.toFixed(1)}</td>
+        <td style="padding:10px; text-align:center;">${d.fat.toFixed(1)}</td>
+        <td style="padding:10px; text-align:center;">${d.fiber.toFixed(1)}</td>
+      </tr>`;
+    }
+  }
+
+  renderWeek();
+
+  document.getElementById('clearDayBtn').addEventListener('click', ()=>{
+    const day = document.getElementById('daySelect').value;
+    weekData[day] = { items:[], kcal:0, protein:0, carbs:0, fat:0, fiber:0 };
+    renderWeek();
+  });
+
+  document.getElementById('addToDayBtn').addEventListener('click', () => {
+    const chosen = recipes.find(r => r.name === reverseSelect.value);
+    if (!chosen) return alert('Válassz ki egy ételt!');
+
+    const multiplier = parseFloat(scaleSlider.value);
+    const day = document.getElementById('daySelect').value;
+
+    let totals = {kcal:0, protein:0, carbs:0, fat:0, fiber:0};
+    for (const ing in chosen.needs) {
+      const baseGr = chosen.needs[ing];
+      const currentGr = Math.round(baseGr * multiplier);
+      const d = nutrientData[ing];
+      if (!d) continue;
+      totals.kcal += d.kcal * currentGr / 100;
+      totals.protein += d.protein * currentGr / 100;
+      totals.carbs += d.carbs * currentGr / 100;
+      totals.fat += d.fat * currentGr / 100;
+      totals.fiber += d.fiber * currentGr / 100;
+    }
+
+    weekData[day].kcal += totals.kcal;
+    weekData[day].protein += totals.protein;
+    weekData[day].carbs += totals.carbs;
+    weekData[day].fat += totals.fat;
+    weekData[day].fiber += totals.fiber;
+
+    weekData[day].items.push(chosen.name + " (" + multiplier.toFixed(1) + "×)");
+
+    renderWeek();
+  });
+</script>
+
 </body>
 </html>
