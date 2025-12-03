@@ -9,24 +9,27 @@
     h1 { margin-bottom: 10px; color: #222; }
     .card { background: white; padding: 10px; margin: 5px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #222; }
     .result { margin-top: 10px; padding: 10px; background: #fff; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 20px; flex-wrap: wrap; color: #222; }
-    .nutrient-column { display: flex; flex-direction: column; gap: 10px; }
-    select.card { display: block; width: 100%; padding: 8px; margin-bottom: 10px; }
     .ingredient-list { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
     .ingredient-item { padding: 5px 10px; border-radius: 12px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
     .all-ingredients { margin-top: 20px; }
     .all-ingredient-item { padding: 10px; margin-bottom: 5px; border-radius: 8px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
+    .slider-box { margin-top: 15px; padding: 10px; background:#fff; border-radius: 6px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
   <h1>Gluténmentes étel → ételadatok</h1>
-  <p>A fordított keresésnél egy étel kiválasztásakor az összetevők tápértékei, GI-indexe és színkódja sorokban, meghatározott térközzel jelennek meg.</p>
+  <p>Arányos skálázás csúszkával (A verzió).</p>
 
   <h2>Étel → szükséges alapanyagok</h2>
   <select id="reverseSelect" class="card"></select>
+  <div id="scaleBox" class="slider-box" style="display:none">
+    <label>Mennyiség szorzó: <span id="scaleValue">1.0×</span></label><br>
+    <input type="range" id="scaleSlider" min="0.2" max="3" step="0.1" value="1">
+  </div>
+
   <div id="reverseResult" class="result"></div>
   <div id="ingredientList" class="ingredient-list"></div>
-
-  <div class="all-ingredients" id="allIngredients"></div>
+  <div id="allIngredients" class="all-ingredients"></div>
 
   <script>
     const nutrientData = {
@@ -59,30 +62,26 @@
       "Narancs": { gi: 43, kcal: 47, protein: 0.9, carbs: 12, fat: 0.1, fiber: 2.4, color: "#FFA500" }
     };
 
+    // → Új: alap gramm mennyiségek
     const recipes = [
-      { name: "Rakott krumpli", needs: ["Burgonya", "Tojás", "Tejföl", "Sajt"] },
-      { name: "Sült csirke rizzsel", needs: ["Csirke", "Rizs", "Olívaolaj"] },
-      { name: "Hajdina zöldségekkel", needs: ["Hajdina", "Sárgarépa", "Brokkoli", "Olívaolaj"] },
-      { name: "Quinoa saláta", needs: ["Quinoa", "Paprika", "Cukkini", "Olívaolaj"] },
-      { name: "Kukoricamálé", needs: ["Kukoricaliszt", "Tojás", "Vaj"] },
-      { name: "Kínai káposztás tojás", needs: ["Tojás","Lilakáposzta", "Olívaolaj"]}
+      { name: "Rakott krumpli", needs: { "Burgonya": 600, "Tojás": 200, "Tejföl": 150, "Sajt": 100 } },
+      { name: "Sült csirke rizzsel", needs: { "Csirke": 400, "Rizs": 200, "Olívaolaj": 20 } },
+      { name: "Hajdina zöldségekkel", needs: { "Hajdina": 200, "Sárgarépa": 150, "Brokkoli": 200, "Olívaolaj": 20 } },
+      { name: "Quinoa saláta", needs: { "Quinoa": 200, "Paprika": 150, "Cukkini": 150, "Olívaolaj": 20 } },
+      { name: "Kukoricamálé", needs: { "Kukoricaliszt": 250, "Tojás": 100, "Vaj": 80 } },
+      { name: "Kínai káposztás tojás", needs: {"Tojás": 200,"Lilakáposzta": 500, "Olívaolaj": 50}}
     ];
 
     const reverseSelect = document.getElementById("reverseSelect");
     const ingredientListDiv = document.getElementById("ingredientList");
     const allIngredientsDiv = document.getElementById("allIngredients");
+    const scaleSlider = document.getElementById("scaleSlider");
+    const scaleValue = document.getElementById("scaleValue");
+    const scaleBox = document.getElementById("scaleBox");
 
     function refreshDropdown() {
-      reverseSelect.innerHTML = '';
-      const placeholder = document.createElement('option');
-      placeholder.value = ''; placeholder.textContent = '-- Válassz ételt --';
-      placeholder.selected = true; placeholder.disabled = true;
-      reverseSelect.appendChild(placeholder);
-      recipes.forEach(r => {
-        const opt = document.createElement("option");
-        opt.value = r.name; opt.textContent = r.name;
-        reverseSelect.appendChild(opt);
-      });
+      reverseSelect.innerHTML = '<option disabled selected value="">-- Válassz ételt --</option>';
+      recipes.forEach(r => reverseSelect.innerHTML += `<option value="${r.name}">${r.name}</option>`);
     }
 
     function renderAllIngredients() {
@@ -92,8 +91,6 @@
         const div = document.createElement('div');
         div.className = 'all-ingredient-item';
         div.style.backgroundColor = d.color;
-        div.style.color = '#fff';
-        div.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
         div.innerHTML = `<strong>${name}</strong> - GI: ${d.gi}, Kcal: ${d.kcal}, Fehérje: ${d.protein} g, Szénhidrát: ${d.carbs} g, Zsír: ${d.fat} g, Rost: ${d.fiber} g`;
         allIngredientsDiv.appendChild(div);
       }
@@ -103,29 +100,68 @@
     renderAllIngredients();
 
     reverseSelect.addEventListener("change", () => {
+      scaleSlider.value = 1;
+      scaleValue.textContent = "1.0×";
+      scaleBox.style.display = "block";
+      updateView();
+    });
+
+    scaleSlider.addEventListener("input", updateView);
+
+    function updateView() {
       const chosen = recipes.find(r => r.name === reverseSelect.value);
-      const box = document.getElementById("reverseResult");
-      ingredientListDiv.innerHTML = '';
       if (!chosen) return;
 
-      const parts = [`<div class="card"><strong>${chosen.name}</strong><br>Hozzávalók: ${chosen.needs.join(", ")}</div>`];
-      chosen.needs.forEach(n => {
-        const d = nutrientData[n];
-        if (!d) { parts.push(`<div class="card">${n}: Nincs tápérték adat.</div>`); }
-        else {
-          parts.push(`<div class="card" style="background-color:${d.color}; line-height: 1.6; color:#fff; text-shadow:1px 1px 2px rgba(0,0,0,0.7)"><strong>${n}</strong><br>GI: ${d.gi}<br>Kcal: ${d.kcal}<br>Fehérje: ${d.protein} g<br>Szénhidrát: ${d.carbs} g<br>Zsír: ${d.fat} g<br>Rost: ${d.fiber} g</div>`);
+      const multiplier = parseFloat(scaleSlider.value);
+      scaleValue.textContent = multiplier.toFixed(1) + "×";
 
-          const ingDiv = document.createElement('div');
-          ingDiv.textContent = n;
-          ingDiv.className = 'ingredient-item';
-          ingDiv.style.backgroundColor = d.color;
-          ingDiv.style.textShadow = '1px 1px 2px rgba(0,0,0,0.7)';
-          ingredientListDiv.appendChild(ingDiv);
-        }
-      });
+      const box = document.getElementById("reverseResult");
+      ingredientListDiv.innerHTML = '';
 
-      box.innerHTML = parts.join("");
-    });
+      let html = `<div class=card><strong>${chosen.name}</strong><br>Alap mennyiség skálázva: ${multiplier.toFixed(1)}×</div>`;
+
+      for (const ing in chosen.needs) {
+        const baseGr = chosen.needs[ing];
+        const currentGr = Math.round(baseGr * multiplier);
+        const d = nutrientData[ing];
+
+        if (!d) continue;
+
+        const kcal = (d.kcal * currentGr / 100).toFixed(1);
+        const protein = (d.protein * currentGr / 100).toFixed(1);
+        const carbs = (d.carbs * currentGr / 100).toFixed(1);
+        const fat = (d.fat * currentGr / 100).toFixed(1);
+        const fiber = (d.fiber * currentGr / 100).toFixed(1);
+
+        html += `
+        <div class="card" style="background-color:${d.color}; color:#fff; text-shadow:1px 1px 2px #000">
+          <strong>${ing}</strong> – ${currentGr} g<br>
+          GI: ${d.gi}<br>
+          Kcal: ${kcal}<br>
+          Fehérje: ${protein} g<br>
+          Szénhidrát: ${carbs} g<br>
+          Zsír: ${fat} g<br>
+          Rost: ${fiber} g
+        </div>`;
+
+        const tag = document.createElement('div');
+        tag.className = 'ingredient-item';
+        tag.textContent = ing + " (" + currentGr + " g)";
+        tag.style.backgroundColor = d.color;
+        ingredientListDiv.appendChild(tag);
+      }
+
+      box.innerHTML = html;
+    }
   </script>
+  <div id="ingredientLegend" class="card" style="margin-top:20px; background:#e0e7ef; color:#222;">
+    <h3>Jelmagyarázat a nem grammban értelmezhető hozzávalókhoz</h3>
+    <ul>
+      <li><strong>Tojás (S)</strong> ≈ 50 g</li>
+      <li><strong>Tojás (M)</strong> ≈ 60 g</li>
+      <li><strong>Tojás (L)</strong> ≈ 70 g</li>
+      <li><strong>Olívaolaj</strong> – 1 evőkanál ≈ 13.5 g</li>
+    </ul>
+  </div>
 </body>
 </html>
