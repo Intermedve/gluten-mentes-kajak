@@ -131,11 +131,42 @@
     .btn-red:hover { background: var(--btn-red-hover); }
 
     select.card { padding: 6px 10px; }
+
+    /* Mobilbarát vezérlősor a Heti étkezés tervezőnél */
+    .planner-controls {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap; /* kisebb képernyőn törhessen új sorba */
+    }
+
+    /* 640px alatt egymás alá rendezzük, teljes szélességre */
+    @media (max-width: 640px) {
+      .planner-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .planner-controls .btn,
+      .planner-controls select.card,
+      .planner-controls label {
+        width: 100%;
+      }
+    }
+
+    /* Heti tápanyag összesítő táblázat – vízszintes görgetés kicsi kijelzőn */
+    #weekTable {
+      overflow-x: auto;
+    }
+    #weekTable table {
+      min-width: 720px; /* ha a képernyő ennél keskenyebb, görgethető lesz */
+    }
+
   </style>
 </head>
 <body>
-  <h1>Gluténmentes étel → ételadatok</h1>
-  <p>Arányos skálázás csúszkával (A verzió).</p>
+  <h1>Gluténmentes étel → Bevásárlólista</h1>
+  <p>Arányos skálázás csúszkával, napi és heti tervel valamint összesítéssel a bevásárlólistákhoz.</p>
 
   <h2>Étel → szükséges alapanyagok</h2>
   <select id="reverseSelect" class="card"></select>
@@ -149,7 +180,7 @@
 
   <div id="weeklyPlanner" style="margin-top:20px; margin-bottom:30px; box-shadow: var(--shadow);">
     <h2 style="margin-top:0; font-size:26px;">📅 Heti étkezés tervező</h2>
-    <div class="card" style="padding:15px; display:flex; gap:20px; align-items:center;">
+    <div class="card planner-controls" style="padding:15px;">
       <label><strong>Nap kiválasztása:</strong>
         <select id="daySelect" class="card" style="padding:5px 10px;">
           <option value="Hétfő">Hétfő</option>
