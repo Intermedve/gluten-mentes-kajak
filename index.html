@@ -299,7 +299,12 @@
       "Fokhagyma": { gi: 10, kcal: 149, protein: 6.4, carbs: 33, fat: 0.5, fiber: 2.1, color: "#E8E1C8" },
       "Csirke alsócomb": { gi: 0, kcal: 174, protein: 18, carbs: 0, fat: 12, fiber: 0, color: "#E3CFC4" },
       "Csirke felsőcomb": { gi: 0, kcal: 209, protein: 16, carbs: 0, fat: 16, fiber: 0, color: "#D8BEB0" },
-      "Csirkeszárny": { gi: 0, kcal: 203, protein: 17, carbs: 0, fat: 15, fiber: 0, color: "#C9A99A" }
+      "Kocsonyalé": { gi: 0, kcal: 25, protein: 6, carbs: 0, fat: 0.5, fiber: 0, color: "#CFCAC2" },
+      "Sertéshús (főtt)": { gi: 0, kcal: 242, protein: 27, carbs: 0, fat: 14, fiber: 0, color: "#B08A6A" },
+      "Malacfül": { gi: 0, kcal: 260, protein: 22, carbs: 0, fat: 20, fiber: 0, color: "#9C6E55" },
+      "Csirkeszárny": { gi: 0, kcal: 203, protein: 17, carbs: 0, fat: 15, fiber: 0, color: "#C9A99A" },
+      "Vaj": { gi: 0, kcal: 717, protein: 0.9, carbs: 0.1, fat: 81, fiber: 0, color: "#D4B454" },
+      "Olívaolaj": { gi: 0, kcal: 884, protein: 0, carbs: 0, fat: 100, fiber: 0, color: "#6E7B4B" }
     };
 
     // → Új: alap gramm mennyiségek
@@ -315,6 +320,10 @@
       { name: "Sült csirke alsócomb", needs: { "Csirke alsócomb": 1500, "Olívaolaj": 100 } },
       { name: "Sült csirke felsőcomb", needs: { "Csirke felsőcomb": 1500, "Olívaolaj": 100 } },
       { name: "Sült csirkeszárny", needs: { "Csirkeszárny": 1500, "Olívaolaj": 100 } },
+      { name: "Kocsonya", needs: { "Kocsonyalé": 300, "Sertéshús (főtt)": 100, "Malacfül": 50 } },
+      { name: "Tojás (1 db)", needs: { "Tojás": 60 } },
+      { name: "Vaj (1 ek)", needs: { "Vaj": 10 } },
+      { name: "Olívaolaj (1 ek)", needs: { "Olívaolaj": 10 } },
     ];
 
     const reverseSelect = document.getElementById("reverseSelect");
